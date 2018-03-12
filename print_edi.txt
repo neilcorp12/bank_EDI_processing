@@ -1,129 +1,69 @@
 Sub print_edi()
-
 '
-
 ' print_edi Macro
-
 '
-
 '
-
 Selection.PageSetup.Orientation = wdOrientLandscape
-
  
-
 Dim rng As Range
-
 Dim i, j As Integer
-
 Dim arr(50, 2) As String
-
 Dim iParCount As Long
-
 Dim total_amt, sub_amt As Single
-
  
-
 iParCount = ActiveDocument.Paragraphs.count
-
 i = 0
-
 total_amt = 0
-
  
-
 For j = 1 To iParCount
-
     ' Collect bank name in array
-
     If Mid(ActiveDocument.Paragraphs(j).Range.Text, 1, 15) = "BANK NAME    : " Then
-
         arr(i, 0) = RTrim(Mid(ActiveDocument.Paragraphs(j).Range.Text, 16, 21))
-
     End If
-
-   
 
     ' Collect payment number in array
-
     If Mid(ActiveDocument.Paragraphs(j).Range.Text, 1, 8) = "PAYMENT#" Then
-
         arr(i, 1) = RTrim(Mid(ActiveDocument.Paragraphs(j).Range.Text, 16, 21))
-
     End If
-
-   
 
     ' Collect payment amount in array
-
     If Mid(ActiveDocument.Paragraphs(j).Range.Text, 49, 12) = "TOTAL AMOUNT" Then
-
         arr(i, 2) = LTrim(Mid(ActiveDocument.Paragraphs(j).Range.Text, 64, 16))
-
         total_amt = total_amt + Val(Format(arr(i, 2), "0.00"))
-
         i = i + 1
 
-       
-
         ' Merge payment amounts if the pay number is the same as the last page
-
         If i - 1 > 0 Then
-
         If Val(arr(i - 1, 1)) = Val(arr(i - 2, 1)) And arr(i - 1, 0) = arr(i - 2, 0) Then
-
             sub_amt = Val(Format(arr(i - 1, 2), "0.00")) + Val(Format(arr(i - 2, 2), "0.00"))
-
             arr(i - 2, 2) = Format(sub_amt, "Currency")
-
             i = i - 1
-
         End If
-
         End If
-
     End If
-
 Next j
-
  
-
 j = i - 1
 
 ' Move to beginning
 
 Selection.HomeKey Unit:=wdStory
 
- 
-
 ' Print bank name, payment and payment amount
 
 For i = 0 To j
-
     Selection.TypeText arr(i, 0) & ", " & arr(i, 1) & ", " & arr(i, 2) & vbCr
-
 Next
-
- 
 
 Selection.TypeText i & " payments total" & vbCr
 
- 
-
 With Selection
-
     .Font.Bold = True
-
     .TypeText "Total EDI payments received: " & Format(total_amt, "Currency") & vbCr
-
 End With
-
- 
 
 ' Add page break and reorient page
 
 Selection.InsertBreak Type:=wdPageBreak
-
 Selection.HomeKey Unit:=wdStory
-
 End Sub
